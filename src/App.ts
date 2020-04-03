@@ -5,13 +5,8 @@ import { Server } from "http";
 import { Config } from "./Config";
 import { Router, NextFunction } from 'express-serve-static-core';
 import { EventEmitter } from 'events';
-import LandroidSRouter from './LandroidSRouter';
 import { LandroidS } from './LandroidS';
 import { Mqtt } from './Mqtt';
-import WeatherRouter from './WeatherRouter';
-import SchedulerRouter from './SchedulerRouter';
-import { Scheduler } from './Scheduler';
-import { ScheduledTasks } from './ScheduledTasks';
 import { getLogger, Logger, configure as configureLog4js } from "log4js";
 
 export class App extends EventEmitter {
@@ -56,46 +51,15 @@ export class App extends EventEmitter {
         this.express.set("trust proxy", true);
         this.express.use(bodyParser.json());
         this.express.use(bodyParser.urlencoded({ extended: false }));
-        this.setupRoutes();
-        new Scheduler().init().then(() => {
-            LandroidS.getInstance().init().then(() => {
-                ScheduledTasks.init();
-                this.emit("appStarted");
-                this.log.info("Server ready");
-            }).catch(e => this.log.error(e));
-        }).catch(e => this.log.error(e));
+        LandroidS.getInstance().init();
     }
 
     private setupMqtt(): void {
         this.mqtt = Mqtt.getInstance();
     }
 
-    private setupRoutes(): void {
-        let router: Router = express.Router();
-        this.express.use('/', router);
-        this.express.use("/landroid-s", LandroidSRouter);
-        this.express.use("/scheduler", SchedulerRouter);
-        this.express.use("/weather", WeatherRouter);
-        this.addStaticFilesRoutes();
-    }
-
-    private addStaticFilesRoutes(): void {
-        let router = express.Router();
-        let staticFilesPaths = [
-            path.join(__dirname, "../www")
-        ];
-        staticFilesPaths.forEach(staticFilesPath => {
-            this.log.info("Adding static files path %s", staticFilesPath);
-            this.express.use(express.static(staticFilesPath));
-        });
-    }
-
     private exitOnSignal(): void {
         this.log.info("Received exit signal...");
-        if (this.server) {
-            this.log.info("Closing http listener...");
-            this.server.close();
-        }
         process.exit(0);
     }
 

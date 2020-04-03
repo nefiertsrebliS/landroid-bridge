@@ -1,6 +1,5 @@
 import * as LandroidCloud from "iobroker.landroid-s/lib/mqttCloud";
 import { Config } from "./Config";
-import { LandroidDataset } from "./LandroidDataset";
 import { Mqtt } from "./Mqtt";
 import { IoBrokerAdapter } from "./IoBrokerAdapter";
 import { getLogger, Logger } from "log4js";
@@ -10,7 +9,6 @@ export class LandroidS {
     private static INIT_TIMEOUT: number = 60;
     private initialized: boolean = false;
     private landroidCloud: LandroidCloud;
-    private latestUpdate: LandroidDataset;
     private firstCloudMessageCallback: Function = null;
     private log: Logger;
 
@@ -19,10 +17,6 @@ export class LandroidS {
             throw new Error("Call LandroidS.getInstance() instead!");
         }
         this.log = getLogger(this.constructor.name);
-    }
-
-    public getLatestUpdate(): LandroidDataset {
-        return this.latestUpdate;
     }
 
     public startMower(): void {
@@ -55,21 +49,8 @@ export class LandroidS {
         this.sendMessage(null, {rd: rainDelay});
     }
 
-    public setSchedule(weekday: number, val: string|Object): void {
-        if (isNaN(weekday) || weekday < 0 || weekday > 6) {
-            throw Error("Weekday must be >= 0 and <= 6 where 0 is Sunday");
-        }
-        if (!this.latestUpdate || !this.latestUpdate.schedule) {
-            throw Error("Can only set new schedule when current schedule has been retrieved from cloud service");
-        }
-        let timePeriod = this.jsonToObject(val);
-        if (!timePeriod) {
-            throw Error("Value must be a valid JSON string or an object");
-        }
-        let message = this.latestUpdate.schedule.map(entry => this.timePeriodToCloudArray(entry.serialize()));
-        message[weekday] = this.timePeriodToCloudArray(timePeriod);
-        this.log.info("Setting new schedule with update for weekday %d to %s", weekday, JSON.stringify(message));
-        this.sendMessage(null, {sc: {d: message}});
+    public setSchedule(val: string|Object): void {
+        this.sendMessage(null, {sc: {d: this.jsonToObject(val)}});
     }
 
     public poll(): void {
@@ -145,31 +126,10 @@ export class LandroidS {
     }
 
     private updateListener(status: any): void {
-        let dataset: LandroidDataset = new LandroidDataset(status);
-        this.publishMqtt(this.latestUpdate, dataset);
-        this.latestUpdate = dataset;
+        Mqtt.getInstance().publish("", JSON.stringify(status), true);
         if (this.firstCloudMessageCallback) {
             this.firstCloudMessageCallback();
             this.firstCloudMessageCallback = null;
-        }
-    }
-
-    private publishMqtt(previousDataset: LandroidDataset, currentDataset: LandroidDataset): void {
-        let prev = (previousDataset ? previousDataset.serialize() : null);
-        let curr = currentDataset.serialize();
-        for (let key of Object.keys(curr)) {
-            let val = curr[key];
-            if (!prev || prev[key] !== val) {
-                if (val instanceof Array) {
-                    val.forEach((entry, i) => {
-                        if (!prev || !prev[key] || !prev[key][i] || JSON.stringify(prev[key][i]) !== JSON.stringify(val[i])) {
-                            Mqtt.getInstance().publish("status/" + key + "/" + i, JSON.stringify(val[i]), true);
-                        }
-                    });
-                } else {
-                    Mqtt.getInstance().publish("status/" + key, String(val), true);
-                }
-            }
         }
     }
 
@@ -195,9 +155,8 @@ export class LandroidS {
                 this.setRainDelay(payload);
             } else if (topic === "set/timeExtension") {
                 this.setTimeExtension(payload);
-            } else if (topic.startsWith("set/schedule/")) {
-                let weekday = parseInt(topic.substr("set/schedule/".length), 10);
-                this.setSchedule(weekday, String(payload));
+            } else if (topic === "set/schedule") {
+                this.setSchedule(String(payload));
             } else if (topic === "set/poll") {
                 this.poll();
             } else {
