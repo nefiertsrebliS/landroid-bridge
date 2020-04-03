@@ -3,8 +3,7 @@ Publishes readings from the Worx Landroid S Lawn Mower via MQTT. Allows for modi
 
 ## Setup
 ### Prerequisites
-* If you want to use MQTT, you need to have an MQTT Broker like [Eclipse Mosquitto](http://mosquitto.org/) installed.
-* If you want to build from source, make sure you have [Node.js](https://nodejs.org/en/) installed.
+* To use MQTT, you need to have an MQTT Broker like [IP-Symcon V5.0 or newer](https://www.symcon.de/) or [Eclipse Mosquitto](http://mosquitto.org/) installed.
 
 ### Building from source
 1. Make sure you have [Node.js](https://nodejs.org) installed (tested with Node.js v11).
