@@ -2,16 +2,11 @@
 Publishes readings from the Worx Landroid S Lawn Mower via MQTT. Allows for modifying settings via MQTT.
 
 ## Changelog
-	<table>
-	  <tr>
-		<td>V1.0 &nbsp;&nbsp;&nbsp;&nbsp;</td>
-		<td>Grundversion</td>
-	  </tr>
-	  <tr>
-		<td>V1.01 &nbsp;&nbsp;&nbsp;&nbsp;</td>
-		<td>New: set/json</td>
-	  </tr>
-	</table>
+
+| Version | Changes          |
+| --------|------------------|
+| V1.00   | Baseversion      |
+| V1.01   | New: set/json    |
 
 ## Setup
 ### Prerequisites
