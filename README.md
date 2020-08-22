@@ -1,6 +1,18 @@
 # Landroid Bridge mainly for IP-Symcon
 Publishes readings from the Worx Landroid S Lawn Mower via MQTT. Allows for modifying settings via MQTT.
 
+## Changelog
+	<table>
+	  <tr>
+		<td>V1.0 &nbsp;&nbsp;&nbsp;&nbsp;</td>
+		<td>Grundversion</td>
+	  </tr>
+	  <tr>
+		<td>V1.01 &nbsp;&nbsp;&nbsp;&nbsp;</td>
+		<td>New: set/json</td>
+	  </tr>
+	</table>
+
 ## Setup
 ### Prerequisites
 * To use MQTT, you need to have an MQTT Broker like [IP-Symcon V5.0 or newer](https://www.symcon.de/) or [Eclipse Mosquitto](http://mosquitto.org/) installed.

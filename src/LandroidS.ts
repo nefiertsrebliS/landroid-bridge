@@ -57,6 +57,10 @@ export class LandroidS {
         this.sendMessage(null, {});
     }
 
+    public setJson(val: string|Object): void {
+        this.sendMessage(null, this.jsonToObject(val));
+    }
+
     private timePeriodToCloudArray(timePeriod: any): Array<any> {
         return [
             ("00" + timePeriod["startHour"]).slice(-2) + ":" + ("00" + timePeriod["startMinute"]).slice(-2),
@@ -159,6 +163,8 @@ export class LandroidS {
                 this.setSchedule(String(payload));
             } else if (topic === "set/poll") {
                 this.poll();
+            } else if (topic === "set/json") {
+                this.setJson(String(payload));
             } else {
                 this.log.error("Unknown MQTT topic: %s", topic);
             }
