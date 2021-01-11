@@ -1,6 +1,8 @@
 # Landroid Bridge mainly for IP-Symcon
 Publishes readings from the Worx Landroid S Lawn Mower via MQTT. Allows for modifying settings via MQTT.
 
+### THIS BRIDGE IS OUT OF SERVICE. PLEASE USE THE [NEW ONE](https://github.com/nefiertsrebliS/mqtt-landroid-bridge)
+
 ## Changelog
 
 | Version | Changes          |
